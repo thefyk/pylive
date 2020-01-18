@@ -47,18 +47,22 @@ class Track(LoggingObject):
         return active_clips
 
     def create_clip(self, clip_index, length):
-        if self.clips[clip_index] is not None:
-            raise LiveInvalidOperationException("Clip [%d, %d] already exists" % (self.index, clip_index))
-        else:
+        try:
+            self.clips[clip_index]
             self.set.create_clip(self.index, clip_index, length)
             self.clips[clip_index] = Clip(self, clip_index, length)
+        
+        except IndexError as e:
+            raise LiveInvalidOperationException("Clip [%d, %d] already exists" % (self.index, clip_index))
 
     def delete_clip(self, clip_index):
-        if self.clips[clip_index] is None:
-            raise LiveInvalidOperationException("Clip [%d, %d] does not exist" % (self.index, clip_index))
-        else:
+        try:
+            self.clips[clip_index]
             self.set.delete_clip(self.index, clip_index)
             self.clips[clip_index] = None
+
+       except IndexError as e:
+            raise LiveInvalidOperationException("Clip [%d, %d] does not exist" % (self.index, clip_index))
 
     @property
     def scene_indexes(self):
